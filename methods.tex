@@ -1,0 +1,45 @@
+\section{Method(s)} % chktex 36
+
+
+Let
+\begin{itemize}
+    \item $\mathcal{Y} \subset \mathbb{R}^{D_\text{large}}$ denote a real-valued data/image space and $\mathcal{Z} = {\{0, 1\}}^{D_\text{small}}$ a binary-valued latent space,
+    \item ${\{ y_i \}}_{i=1}^N$ with $y_i \in \mathcal{Y}$ denote a set of $N$ images/data,
+    \item $\ell_\text{rec} : \mathcal{Y} \times \mathcal{Y} \rightarrow \mathbb{R}$, $\ell(\hat{y}, y)$ denote the data reconstruction loss,
+    \item $\log p_\text{BM}(z; J, h) \propto -\beta (z^\top J z + h^\top z)$, $z \in \mathcal{Z}$ denote the log likelihood of a Boltzmann machine over the latent space,
+        and
+    \item $T_\text{enc} : \mathcal{Y} \rightarrow \mathcal{Z}, T_\text{enc}(y; \theta_\text{enc})$ denote the deterministic encoder and $T_\text{dec} : \mathcal{Z} \rightarrow \mathcal{Y}, T_\text{dec}(z; \theta_\text{dec})$ the deterministic decoder.
+\end{itemize}
+
+
+\TODO{Modulo the detail of the ST estimator for the autoencoder\ldots}
+Let $\tilde{z}_i := T_\text{enc}(y_i; \theta_\text{enc})$.
+Training begins by optimizing the following objective:
+\begin{equation}
+    \theta^\star_\text{enc}, \theta^\star_\text{dec}, J^\star, h^\star
+    =
+    \argmin_{\theta_\text{enc}, \theta_\text{dec}, J, h} \bigg[ 
+        \sum_i
+            \ell_\text{rec}(
+                T_\text{dec}(\tilde{z}_i; \theta_\text{dec}), 
+                %T_\text{dec}(T_\text{enc}(y_i; \theta_\text{enc}); \theta_\text{dec}), 
+                y_i
+            )\\
+            -
+            \log p_\text{BM}(
+                %T_\text{enc}(y_i; \theta_\text{enc}); J, h
+                \tilde{z}_i; J, h
+            )
+    \bigg]
+    \label{eq:ae-training-objective}
+\end{equation}
+Now, letting $z_i := T_\text{enc}(y_i; \theta^\star_\text{enc})$,
+flow matching is performed using
+${\{  
+    %T_\text{enc}(y_i; \theta^\star_\text{enc})
+    z_i
+\}}_{i=1}^{N}$
+as the data set and
+QPU$( ;J^\star, h^\star, \theta_\text{ann} )$ as a prior over $\mathcal{Z}$.
+\Q{How to describe a sample $z \sim \text{QPU}( ;J^\star, h^\star, \theta_\text{ann} )$?}
+

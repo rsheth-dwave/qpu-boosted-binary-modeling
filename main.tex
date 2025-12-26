@@ -1,0 +1,36 @@
+% latexmk -pdf main
+\documentclass{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{fullpage}
+\usepackage[backend=biber,style=apa,natbib=true]{biblatex}
+\addbibresource{refs.bib}
+\usepackage{xcolor}
+\newif\ifcomments%
+\commentstrue% set \commentsfalse for clean PDF
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+% Make \cref{eq:...} render as "(3)" instead of "equation (3)"
+\crefformat{equation}{#2(#1)#3}
+\Crefformat{equation}{#2(#1)#3}
+
+\input{commands}
+
+\title{QPU-boosted modeling of binary-valued data}
+\author{D-Wave}
+%\date{December 2025}
+
+\begin{document}
+
+\maketitle
+
+\input{introduction}
+\input{related}
+\input{methods}
+\input{experiments}
+
+\printbibliography%
+
+\end{document}
