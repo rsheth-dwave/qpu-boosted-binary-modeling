@@ -1,9 +1,17 @@
 \section{Experiments}
 
-Utilizing \cref{eq:ae-training-objective} on \TODO{which dataset?} and then sampling latent codes from QPU$( ;J^\star, h^\star, \theta_\text{ann} )$ yields the results in \Cref{fig:qpu-sampled-image}.
+Utilizing \cref{eq:ae-training-objective} on \TODO{which dataset?} and then sampling latent codes from the learned QPU$( ;J^\star, h^\star, \theta_\text{ann} )$ yields the results in \Cref{fig:qpu-sampled-image}.
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\linewidth]{figs/qpu-sampled-image.png}
-    \caption{Generated samples from the trained QPU.}%
+    \includegraphics[width=0.9\linewidth]{figs/qpu-sampled-image.png}
+    \caption{Generated samples from the learned QPU.}%
     \label{fig:qpu-sampled-image}
+\end{figure}
+Performing discrete flow matching to learn the ``velocity field'' between 
+${\{ z_i \}}_{i=1}^{N}$ and (generated) samples from the learned QPU yields the results in \Cref{fig:flow-matched-qpu-coupled-sampled-image}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/flow-matched-qpu-coupled-sampled-image.png}
+    \caption{Generated samples after flow matching to the learned QPU.}%
+    \label{fig:flow-matched-qpu-coupled-sampled-image}
 \end{figure}
