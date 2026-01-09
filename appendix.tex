@@ -1,0 +1,106 @@
+\appendix
+\section{Experiments}
+
+\subsection{DNF}
+
+\begin{enumerate}
+    \item Start with trained and frozen autoencoders from \citet{wang2023binarylatentdiffusion}.
+    \item Train a discrete normalizing flow \citep{tran2019discreteflowsinvertiblegenerative}.
+        \begin{itemize}
+            \item Characterize performance as a function of architecture complexity.
+            \item Can use fixed blocks, e.g., permutation $\rightarrow$ coupling or permutation $\rightarrow$ coupling  $\rightarrow$ invertible linear map over $\mathbb{F}_2$ (?)
+        \end{itemize}
+\end{enumerate}
+
+I can imagine:
+\begin{enumerate}
+    \item For a fixed QPU prior, many layers might be required for high performance
+    \item If learning the QPU prior, then what happens???
+\end{enumerate}
+
+\section{General}
+
+Diffusion and flow matching models construct, explicitly or implicitly, a path of intermediate distributions between a simple base distribution and a data distribution.
+In the continuous-valued case, \citet{song2021scorebasedgenerativemodelingstochastic,Maoutsa_2020} showed the forward diffusion 
+During inference, or generation, they learn a mechanism to traverse that path at inference time via deterministic mapping (probability flow) or stochastic simulation (reverse SDE).
+Consistency models \citep{song2023consistencymodels,kim2024consistencytrajectorymodelslearning,boffi2025buildconsistencymodellearning} operate in the same space but attempt to learn a transition operator $\hat{X}_{s,t} : \mathbb{R}^d \rightarrow \mathbb{R}^d$ directly, e.g., $\hat{X}_{s,t}(x_s) \approx x_t$.
+
+\subsection{Related work}
+
+Let $\mathcal{P}$ denote the space of probability densities over $\mathbb{R}^d$ with finite second moment,
+$W_2 : \mathcal{P} \times \mathcal{P} \rightarrow \mathbb{R}_{\ge 0}$ the Wasserstein-2 metric,
+and let
+$p^{(0)} \in \mathcal{P}$,
+$\beta \in \mathbb{R}_{>0}$,
+$h \in \mathbb{R}_{>0}$,
+and
+a potential field $U : \mathbb{R}^d \rightarrow \mathbb{R}$
+be given.
+The Fokker-Planck evolution
+%Given a scalar constant $\beta \in \mathbb{R}_{>0}$ and potential field $U : \mathbb{R}^d \rightarrow \mathbb{R}_{\ge 0}$, \citet{jordan1998variational} study Fokker-Planck equations of the form
+\begin{equation}
+    \frac{\partial p}{\partial t} = \nabla \cdot \big( \nabla U(x) p(x, t) + \beta^{-1} \nabla p(x, t) \big)
+    \label{eq:jordan-fpe}
+\end{equation}
+arises naturally in applications.
+For example, it is induced by physical processes governed by the stochastic differential equation
+$\mathrm{d}X(t) = -\nabla U( X(t) ) \mathrm{d}t + \sqrt{2 \beta^{-1}} \mathrm{d}W(t)$
+where $W(t)$ is a standard Wiener process.\
+It is well known (e.g.,~\citet{jordan1998variational}) that, for a class of potentials, e.g., $U(x) \in \omega\!\left(\Vert x \Vert^2\right)$,
+there exists a unique stationary solution of \cref{eq:jordan-fpe} given by the Gibbs distribution
+$
+p_\text{stat}(x) = \exp( -\beta U(x) ) / Z(\beta),
+$
+where $Z(\beta) = \int \exp( -\beta U(x) ) \mathrm{d}x$.
+Moreover, this stationary distribution is also the minimizer of the functional $F(p) := E(p) - \beta^{-1} H(p)$ where $E(p) := \E_{p(x)} U(x)$ and $H(p) := -\E_{p(x)} \log p(x)$.
+\citet{jordan1998variational} show broad conditions under which the iterates
+\begin{equation}
+    p_h^{(k)}
+    =
+    \argmin_{p \in \mathcal{P}} \tfrac{1}{2} W_2^2(p_h^{(k-1)}, p) + h F(p)
+    \label{eq:jordan-grad-flow-scheme}
+\end{equation}
+converge to solutions of \cref{eq:jordan-fpe} as $h \downarrow 0$.
+More specifically,
+given a time $t'$ and sequence $h_1 > h_2 > \cdots > 0$, 
+\citet{jordan1998variational} showed 
+$p_{h_i}^{(\lfloor t'/h_i \rfloor)} \xrightarrow{\text{(w)}} p^\star(\cdot, t')$
+where $p^\star(x, t) : \mathbb{R}^d \times \mathbb{R}_{>0} \rightarrow \mathbb{R}_{\ge 0}$ is the solution of \cref{eq:jordan-fpe}.
+This result established that the Fokker Planck evolution \cref{eq:jordan-fpe} can be solved via geometric procedures, i.e., a Wasserstein gradient flow of $F$, or steepest descent of $F$ w.r.t.\ the Wasserstein metric.
+\NOTE{It is not immediately obvious that \cref{eq:jordan-grad-flow-scheme} is performing gradient descent along $F$ but it is not difficult to show.}
+
+\subsection{Modeling approaches}
+
+The QPU produces a multivariate binary-valued sample with non-trivial correlation structure among the dimensions.
+
+
+\subsection{Efficient ODE solving}
+
+Flow matching and diffusion both yield 
+
+\subsection{Inference in discrete diffusion}
+
+As summarized in Section 2 of \citet{campbell2022continuoustimeframeworkdiscrete}, the generic goal in discrete diffusion is to learn (a network for) the distribution $p^\theta_{0|k+1}( x_0 | x_{k+1} )$ to support the inference step $x_k \sim p^\theta_{k|k+1}( \cdot | x_{k+1} )$.
+Here, 
+\begin{equation}
+    p^\theta_{k|k+1}( x_k | x_{k+1} )
+    :=
+    \E_{x_0 \sim p^\theta_{0|k+1}}
+    \big[
+        q_{k|k+1,0}( x_k | x_{k+1}, x_0 )
+    \big],
+    \label{eq:generic-discrete-diffusion-inference}
+\end{equation}
+and $q_{k|k+1,0}( x_k | x_{k+1}, x_0 )$ is available in closed-form given a Markov forward diffusion $q_{k+1|k}( x_{k+1} | x_k)$.
+The distribution \cref{eq:generic-discrete-diffusion-inference} can be obtained by either sampling $x_0 \sim p^\theta_{0|k+1}$ and then computing the token probabilities or directly computing $p^\theta_{k|k+1}( x_k | x_{k+1} )$ w/o intermediate sampling (resulting in a lower variance estimate).
+In both cases, a distribution must first be computed and then sampled from.
+
+We can contrast this with diffusion on a continuous state space $\mathbb{R}^d$.
+\citet{song2021scorebasedgenerativemodelingstochastic} described 
+
+In continuous diffusion, the state space is $\mathbb{R}^d$ and state transitions are local by definition, i.e., given some state $x_t \in \mathbb{R}^d$ and a non-empty, $x_t$-centered Euclidean ball $B(x_t, \epsilon)$, Pr$[\{ x_{t+\delta t} \in B( x_t, \epsilon) \} | x_t ] \rightarrow 1$ as $\delta t \rightarrow 0$.
+
+Let $S$ denote the number of tokens in a discrete setting and $\mathbb{S} := {\{1, \dots, S\}}$.
+In discrete diffusion, the state space is $\mathbb{S}^d$ and, given some starting state, 
+
+
